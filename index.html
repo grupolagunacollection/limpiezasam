@@ -146,6 +146,7 @@
               <button onclick="sortRecommended()">Ordenar ruta sugerida</button>
               <button class="secondary" onclick="openAdd()">+ Agregar limpieza</button>
               <button class="secondary" onclick="showToast('El resumen se toma de Google Sheets: Limpiezas_Dia, Incidencias e Historial_Cambios.')">Resumen de cierre</button>
+              <button class="secondary" onclick="testConnection()">Diagnóstico conexión</button>
             </div>
             <div class="route" id="routeList"></div>
             <div class="loader" id="syncStatus"></div>
@@ -234,7 +235,7 @@
   2) Si queda vacío, la web funciona en modo demo local.
 */
 const SCRIPT_URL = "PEGAR_AQUI_URL_DE_APPS_SCRIPT";
-const APP_VERSION = '2.1';
+const APP_VERSION = '2.2';
 const ACCESS_PIN = "2026";
 const SUPERVISOR = "Fernanda";
 const STAFF = ['Sin asignar','Valeria','Yuriana','Adrián','Fernanda'];
@@ -280,19 +281,39 @@ function loadCleanings(){
       cleanings = (res.cleanings || []).map(normalizeCleaning);
       sortRecommended();
       setSync(`Actualizado desde Google Sheets · ${new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'})}`);
+      if(!cleanings.length) showToast('Conectó, pero no encontró limpiezas para esta fecha. Revisa columnas de días o fecha seleccionada.');
     })
-    .catch(err=>{ setSync('Error de conexión. Se muestra demo local.'); showToast(err.message); cleanings = demoData(date); sortRecommended(); });
+    .catch(err=>{ setSync('Error de conexión. Revisa diagnóstico.'); showToast(err.message); cleanings = []; sortRecommended(); });
+}
+
+function testConnection(){
+  if(!isConfigured()){ showToast('Falta pegar la URL /exec de Apps Script en SCRIPT_URL.'); return; }
+  setSync('Probando conexión...');
+  jsonp(`${SCRIPT_URL}?action=debugSheets&pin=${encodeURIComponent(currentPin)}`)
+    .then(res=>{
+      if(!res.ok){ throw new Error(res.error || 'Diagnóstico sin respuesta OK'); }
+      const detected = res.planSheetDetected || 'NO DETECTADA';
+      const names = (res.sheets || []).join(', ');
+      setSync(`Conexión OK · Matriz: ${detected}`);
+      showToast(`Conexión OK. Matriz: ${detected}. Hojas: ${names}`);
+    })
+    .catch(err=>{ setSync('No conectó con Apps Script.'); showToast(err.message); });
 }
 
 function jsonp(url){
   return new Promise((resolve,reject)=>{
     const cb='jsonp_'+Date.now()+'_'+Math.round(Math.random()*10000);
-    window[cb]=data=>{ resolve(data); delete window[cb]; script.remove(); };
+    let settled=false;
+    const cleanup=(script)=>{ try{ delete window[cb]; }catch(e){} if(script && script.parentNode) script.parentNode.removeChild(script); };
     const script=document.createElement('script');
-    script.src=url + (url.includes('?')?'&':'?') + 'callback=' + cb;
-    script.onerror=()=>{ reject(new Error('No se pudo conectar con Apps Script')); delete window[cb]; script.remove(); };
+    const timer=setTimeout(()=>{
+      if(!settled){ settled=true; cleanup(script); reject(new Error('Tiempo de espera agotado. Verifica deployment /exec y acceso: Anyone.')); }
+    }, 9000);
+    window[cb]=data=>{ if(settled) return; settled=true; clearTimeout(timer); cleanup(script); resolve(data); };
+    script.onerror=()=>{ if(settled) return; settled=true; clearTimeout(timer); cleanup(script); reject(new Error('No se pudo cargar la URL de Apps Script.')) };
+    script.onload=()=>{ setTimeout(()=>{ if(!settled){ settled=true; clearTimeout(timer); cleanup(script); reject(new Error('Apps Script respondió, pero no devolvió JSONP. Revisa que uses URL /exec, deployment público y Code.gs actualizado.')); } }, 250); };
+    script.src=url + (url.includes('?')?'&':'?') + 'callback=' + cb + '&_=' + Date.now();
     document.body.appendChild(script);
-    setTimeout(()=>{ if(window[cb]){ reject(new Error('Tiempo de espera agotado')); delete window[cb]; script.remove(); } }, 12000);
   });
 }
 
