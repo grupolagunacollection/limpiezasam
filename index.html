@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Control de Limpiezas AM</title>
+  <style>
+    :root{
+      --green:#0b2a1b; --green-2:#123724; --green-3:#1e4d35;
+      --cream:#f4efe4; --sand:#e6d6b5; --gold:#d1b171; --gold-2:#b99753;
+      --ink:#1f2620; --muted:#7a786f; --line:rgba(209,177,113,.28); --white:#fffaf1;
+      --danger:#a34835; --danger-soft:#f6ded8; --ok:#2e6b4d; --ok-soft:#dcebdd;
+      --warn:#b48231; --warn-soft:#faecd0; --blue:#315a68; --blue-soft:#d8e5e9;
+      --correction:#7c4b1e; --correction-soft:#f3e1ca;
+      --shadow:0 24px 70px rgba(3, 20, 12, .18); --radius:24px;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:linear-gradient(135deg,#082316 0%,#0b2a1b 34%,#f5efe2 34%,#f5efe2 100%);color:var(--ink);font-family:"Inter","Jost",Arial,sans-serif;min-height:100vh;}
+    button,input,select,textarea{font-family:inherit}
+    .shell{max-width:1520px;margin:0 auto;padding:24px;}
+    .login{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--green);color:var(--cream);padding:30px;}
+    .login-card{text-align:center;width:min(420px,100%)}
+    .eyebrow{font-size:11px;letter-spacing:.48em;text-transform:uppercase;color:rgba(244,239,228,.66);margin-bottom:26px;}
+    .login h1{font-family:Georgia,"Cormorant Garamond",serif;font-size:60px;font-weight:400;line-height:.95;margin:0 0 10px;}
+    .sub{font-size:11px;letter-spacing:.42em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:44px;}
+    .divider{height:45px;width:1px;background:var(--line);margin:0 auto 30px;}
+    .pin-input{width:100%;height:58px;border:1px solid var(--gold);border-radius:8px;background:rgba(255,255,255,.05);color:var(--cream);text-align:center;font-size:18px;letter-spacing:.14em;outline:none;}
+    .pin-input::placeholder{color:rgba(244,239,228,.45)}
+    .btn-login{margin-top:14px;width:100%;height:52px;border:0;border-radius:8px;background:var(--gold);color:#101510;letter-spacing:.28em;font-weight:800;cursor:pointer;}
+    .hint{font-size:12px;color:rgba(244,239,228,.65);margin-top:18px;line-height:1.5}
+    .app{display:none;}
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:24px;color:var(--cream);}
+    .brand{display:flex;align-items:center;gap:16px;}
+    .logo{width:38px;height:38px;border:1px solid var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:Georgia,serif;color:var(--gold);}
+    .brand-title{font-family:Georgia,serif;font-size:34px;font-weight:400;line-height:1;margin:0;}
+    .brand-meta{font-size:10px;letter-spacing:.34em;text-transform:uppercase;color:var(--gold);margin-top:7px;}
+    .right-tools{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+    .date-pill,.mode-pill{border:1px solid rgba(209,177,113,.45);border-radius:999px;padding:12px 16px;color:var(--cream);font-size:13px;background:rgba(255,255,255,.04)}
+    .date-input{border:0;background:transparent;color:inherit;outline:none;min-width:120px}
+    .mode-pill{cursor:pointer;font-weight:800;text-transform:uppercase;letter-spacing:.06em;font-size:11px}
+    .layout{display:grid;grid-template-columns:390px 1fr;gap:22px;align-items:start;}
+    .panel{background:rgba(255,250,241,.94);border:1px solid rgba(209,177,113,.32);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;}
+    .panel-pad{padding:22px;}
+    .section-title{font-family:Georgia,serif;font-size:24px;font-weight:400;margin:0 0 4px;color:var(--green)}
+    .section-note{font-size:12px;color:var(--muted);line-height:1.5;margin:0 0 18px;}
+    .stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
+    .stat{border:1px solid rgba(11,42,27,.10);background:#fffdf8;border-radius:18px;padding:15px;}
+    .stat b{font-family:Georgia,serif;font-size:30px;font-weight:400;display:block;color:var(--green)}
+    .stat span{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+    .progress-wrap{margin:14px 0 20px;background:#fffdf8;border:1px solid rgba(11,42,27,.10);border-radius:20px;padding:16px;}
+    .progress-top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px;}
+    .progress-title{font-weight:900;text-transform:uppercase;letter-spacing:.08em;font-size:12px;color:var(--green)}
+    .progress-num{font-family:Georgia,serif;font-size:24px;color:var(--green)}
+    .progress-bar{height:20px;width:100%;display:flex;border-radius:999px;overflow:hidden;background:#eadfc8;border:1px solid rgba(11,42,27,.08)}
+    .seg{height:100%;transition:width .25s ease;min-width:0}
+    .seg.pending{background:var(--danger)} .seg.process{background:var(--warn)} .seg.review{background:var(--blue)} .seg.correction{background:var(--correction)} .seg.done{background:var(--ok)} .seg.issue{background:#5e2e25}
+    .legend{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;font-size:12px;color:var(--muted)}
+    .legend span{display:flex;align-items:center;gap:8px}.square{width:10px;height:10px;border-radius:3px;display:inline-block}.red{background:var(--danger)}.yellow{background:var(--warn)}.blue{background:var(--blue)}.green{background:var(--ok)}.brown{background:#5e2e25}.cafe{background:var(--correction)}
+    .quick{display:grid;gap:10px;margin-top:14px;}
+    .quick button,.action-btn,.ghost-btn{border:0;border-radius:16px;padding:14px 15px;text-align:left;cursor:pointer;font-weight:800;letter-spacing:.06em;text-transform:uppercase;font-size:12px;transition:.2s;}
+    .quick button{background:var(--green);color:var(--cream)}.quick button.secondary{background:#fffdf8;color:var(--green);border:1px solid rgba(11,42,27,.14)}
+    .quick button:hover,.action-btn:hover,.ghost-btn:hover{transform:translateY(-1px)}
+    .route{display:grid;gap:10px;margin-top:16px;}
+    .route-item{display:grid;grid-template-columns:34px 1fr auto;gap:10px;align-items:center;padding:12px;border:1px solid rgba(11,42,27,.10);border-radius:16px;background:#fffdf8;}
+    .route-no{width:28px;height:28px;border-radius:50%;background:var(--green);color:var(--cream);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;}
+    .route-item strong{font-size:13px;display:block;color:var(--green)}.route-item span{font-size:12px;color:var(--muted)}.route-tag{font-size:10px;text-transform:uppercase;font-weight:900;padding:6px 8px;border-radius:999px;background:var(--warn-soft);color:var(--warn)}
+    .main-head{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin-bottom:16px;}
+    .tabs{display:flex;gap:8px;flex-wrap:wrap;}
+    .tab{border:1px solid rgba(11,42,27,.12);background:#fffdf8;border-radius:999px;padding:10px 14px;font-size:12px;font-weight:800;cursor:pointer;color:var(--green)}
+    .tab.active{background:var(--green);color:var(--cream);border-color:var(--green)}
+    .sortline{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 16px;}
+    .sort-pill{border:1px solid rgba(11,42,27,.12);border-radius:16px;background:#fffdf8;padding:12px 14px;color:var(--green);font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;cursor:pointer;}
+    .sort-pill.active{background:var(--gold);color:#151913;border-color:var(--gold)}
+    .board{display:grid;grid-template-columns:repeat(3,minmax(250px,1fr));gap:16px;}
+    .empty{grid-column:1/-1;padding:32px;border:1px dashed rgba(11,42,27,.25);border-radius:20px;text-align:center;color:var(--muted);background:#fffdf8}
+    .card{background:#fffdf8;border:1px solid rgba(11,42,27,.12);border-radius:22px;padding:0;overflow:hidden;box-shadow:0 12px 28px rgba(33,31,25,.08);position:relative;}
+    .card-top{height:8px;background:var(--sand)}.card.pendiente .card-top{background:var(--danger)}.card.proceso .card-top{background:var(--warn)}.card.revision .card-top{background:var(--blue)}.card.terminada .card-top{background:var(--ok)}.card.incidencia .card-top{background:#5e2e25}.card.correccion .card-top{background:var(--correction)}
+    .card-body{padding:18px;}.unit-row{display:flex;justify-content:space-between;gap:12px;align-items:start;margin-bottom:12px;}.unit{font-family:Georgia,serif;font-size:28px;color:var(--green);line-height:1.05;text-transform:capitalize;}
+    .suggested{position:absolute;top:16px;right:16px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:900;border-radius:999px;padding:7px 9px;background:var(--green);color:var(--cream);box-shadow:0 8px 18px rgba(0,0,0,.14)}
+    .badge{font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:900;border-radius:999px;padding:7px 10px;white-space:nowrap;}
+    .badge.critica{background:#5e2e25;color:#fff}.badge.alta{background:var(--danger-soft);color:var(--danger)}.badge.media{background:var(--warn-soft);color:var(--warn)}.badge.baja{background:var(--ok-soft);color:var(--ok)}
+    .meta{display:grid;gap:8px;font-size:13px;color:#39443b;margin:16px 0;}.meta div{display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid rgba(11,42,27,.08);padding-bottom:7px;}.meta span:first-child{color:var(--muted)}.meta strong{text-align:right}
+    .cleaner-row{display:grid;grid-template-columns:92px 1fr;gap:10px;align-items:center;border-bottom:1px solid rgba(11,42,27,.08);padding-bottom:8px;margin-bottom:6px;font-size:13px}.cleaner-row span{color:var(--muted)}
+    .cleaner-select{height:38px;border:1px solid rgba(11,42,27,.18);border-radius:12px;background:#fff;padding:0 10px;color:var(--green);font-weight:700;outline:none;}
+    .status{border-radius:14px;padding:10px 12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;font-size:11px;margin-bottom:14px;}.status.pendiente{background:var(--danger-soft);color:var(--danger)}.status.proceso{background:var(--warn-soft);color:var(--warn)}.status.revision{background:var(--blue-soft);color:var(--blue)}.status.terminada{background:var(--ok-soft);color:var(--ok)}.status.incidencia{background:var(--danger-soft);color:#5e2e25}.status.correccion{background:var(--correction-soft);color:var(--correction)}
+    .actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;}.action-btn{background:var(--green);color:var(--cream);text-align:center}.action-btn.gold{background:var(--gold);color:#161a14}.action-btn.blue{background:var(--blue);color:#fff}.ghost-btn{background:#fff;border:1px solid rgba(11,42,27,.14);color:var(--green);text-align:center}.full{grid-column:1 / -1;}
+    .modal{display:none;position:fixed;inset:0;background:rgba(8,35,22,.72);z-index:20;align-items:center;justify-content:center;padding:22px;}.modal-card{width:min(760px,100%);max-height:90vh;overflow:auto;background:var(--cream);border-radius:28px;border:1px solid var(--gold);box-shadow:0 30px 90px rgba(0,0,0,.35);}.modal-head{padding:24px;border-bottom:1px solid rgba(11,42,27,.12);display:flex;justify-content:space-between;align-items:center;gap:16px}.modal-head h3{font-family:Georgia,serif;font-size:28px;font-weight:400;color:var(--green);margin:0}.close{border:0;background:transparent;font-size:28px;color:var(--green);cursor:pointer}.form{padding:24px;display:grid;gap:16px}.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}.checkgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.check{background:#fffdf8;border:1px solid rgba(11,42,27,.12);padding:12px;border-radius:14px;display:flex;justify-content:space-between;gap:12px;align-items:center;font-weight:700;color:var(--green)}
+    label{font-size:12px;color:var(--green);font-weight:900;text-transform:uppercase;letter-spacing:.08em;display:block;margin-bottom:7px}input,select,textarea{width:100%;border:1px solid rgba(11,42,27,.16);border-radius:14px;background:#fffdf8;padding:13px;color:var(--ink);outline:none}textarea{min-height:96px;resize:vertical}.modal-actions{padding:0 24px 24px;display:flex;gap:10px;justify-content:flex-end}.toast{display:none;position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--green);color:var(--cream);border:1px solid var(--gold);padding:13px 18px;border-radius:999px;font-size:13px;z-index:40;box-shadow:0 12px 35px rgba(0,0,0,.25)}
+    .small-note{font-size:11px;color:var(--muted);line-height:1.45;margin-top:8px}
+    .loader{font-size:12px;color:var(--muted);margin-top:8px}
+    @media (max-width:1150px){.layout{grid-template-columns:1fr}.board{grid-template-columns:repeat(2,1fr)}.topbar{color:var(--green)}body{background:#f5efe2}.date-pill,.mode-pill{color:var(--green);background:#fffdf8}}
+    @media (max-width:720px){.shell{padding:14px}.board{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}.brand-title{font-size:28px}.grid-2,.checkgrid{grid-template-columns:1fr}.actions{grid-template-columns:1fr}.login h1{font-size:52px}.main-head{display:block}.tabs{margin-top:12px}.layout{gap:14px}.right-tools{justify-content:flex-start}.topbar{align-items:flex-start;flex-direction:column}.legend{grid-template-columns:1fr}.modal-actions{flex-direction:column}}
+  </style>
+</head>
+<body>
+  <section class="login" id="login">
+    <div class="login-card">
+      <div class="eyebrow">Aldea Mayab · Bacalar</div>
+      <h1>Control de Limpiezas</h1>
+      <div class="sub">Supervisión · Fernanda</div>
+      <div class="divider"></div>
+      <input class="pin-input" id="pin" placeholder="PIN de acceso" type="password" onkeydown="if(event.key==='Enter') enterApp()" />
+      <button class="btn-login" onclick="enterApp()">ACCEDER</button>
+      <div class="hint" id="loginHint">Uso interno · operación Airbnb</div>
+    </div>
+  </section>
+
+  <main class="app" id="app">
+    <div class="shell">
+      <header class="topbar">
+        <div class="brand">
+          <div class="logo">L</div>
+          <div><h1 class="brand-title">Control de Limpiezas</h1><div class="brand-meta">Aldea Mayab · Supervisión diaria</div></div>
+        </div>
+        <div class="right-tools">
+          <div class="date-pill"><input class="date-input" type="date" id="workDate" onchange="loadCleanings()" /></div>
+          <button class="mode-pill" onclick="loadCleanings()">Actualizar</button>
+        </div>
+      </header>
+
+      <section class="layout">
+        <aside class="panel">
+          <div class="panel-pad">
+            <h2 class="section-title">Resumen del día</h2>
+            <p class="section-note">La barra muestra el avance operativo. Rojo es pendiente, amarillo en proceso, azul en revisión, café corrección/incidencia y verde terminado.</p>
+            <div class="stats">
+              <div class="stat"><b id="totalStat">0</b><span>Limpiezas</span></div>
+              <div class="stat"><b id="pendingStat">0</b><span>Pendientes</span></div>
+              <div class="stat"><b id="processStat">0</b><span>En proceso</span></div>
+              <div class="stat"><b id="doneStat">0</b><span>Terminadas</span></div>
+            </div>
+            <div class="progress-wrap">
+              <div class="progress-top"><span class="progress-title">Avance visual</span><span class="progress-num" id="progressPct">0%</span></div>
+              <div class="progress-bar">
+                <div class="seg pending" id="segPending"></div><div class="seg process" id="segProcess"></div><div class="seg review" id="segReview"></div><div class="seg correction" id="segCorrection"></div><div class="seg issue" id="segIssue"></div><div class="seg done" id="segDone"></div>
+              </div>
+              <div class="legend">
+                <span><i class="square red"></i>Pendiente</span><span><i class="square yellow"></i>En proceso</span><span><i class="square blue"></i>Revisión</span><span><i class="square cafe"></i>Corrección</span><span><i class="square brown"></i>Incidencia</span><span><i class="square green"></i>Terminada</span>
+              </div>
+            </div>
+            <div class="quick">
+              <button onclick="sortRecommended()">Ordenar ruta sugerida</button>
+              <button class="secondary" onclick="openAdd()">+ Agregar limpieza</button>
+              <button class="secondary" onclick="showToast('El resumen se toma de Google Sheets: Limpiezas_Dia, Incidencias e Historial_Cambios.')">Resumen de cierre</button>
+            </div>
+            <div class="route" id="routeList"></div>
+            <div class="loader" id="syncStatus"></div>
+          </div>
+        </aside>
+
+        <section class="panel">
+          <div class="panel-pad">
+            <div class="main-head">
+              <div><h2 class="section-title">Limpiezas de hoy</h2><p class="section-note">Prioridad primero; después ruta física: bodega → Chaká → Chechén → Yaxché → Balché. Ubicación muestra solo el departamento.</p></div>
+              <div class="tabs">
+                <button class="tab active" onclick="filterCards('all', this)">Todas</button>
+                <button class="tab" onclick="filterCards('pendiente', this)">Pendientes</button>
+                <button class="tab" onclick="filterCards('proceso', this)">En proceso</button>
+                <button class="tab" onclick="filterCards('revision', this)">Revisión</button>
+                <button class="tab" onclick="filterCards('correccion', this)">Corrección</button>
+                <button class="tab" onclick="filterCards('incidencia', this)">Incidencias</button>
+              </div>
+            </div>
+            <div class="sortline">
+              <button class="sort-pill active" onclick="sortRecommended(this)">Prioridad + ruta</button>
+              <button class="sort-pill" onclick="sortByTime(this)">Hora límite</button>
+              <button class="sort-pill" onclick="sortByTower(this)">Ubicación</button>
+            </div>
+            <div class="board" id="board"></div>
+          </div>
+        </section>
+      </section>
+    </div>
+  </main>
+
+  <div class="modal" id="closeModal">
+    <div class="modal-card">
+      <div class="modal-head"><h3>Terminar limpieza · <span id="closeUnit">Unidad</span></h3><button class="close" onclick="closeModal('closeModal')">×</button></div>
+      <div class="form">
+        <div class="checkgrid">
+          <label class="check">Recámaras listas <input id="chkRecamaras" type="checkbox" checked></label><label class="check">Baños listos <input id="chkBanos" type="checkbox" checked></label><label class="check">Cocina lista <input id="chkCocina" type="checkbox" checked></label><label class="check">Sala / comedor <input id="chkSala" type="checkbox" checked></label><label class="check">Terraza / rooftop <input id="chkTerraza" type="checkbox"></label><label class="check">Alberca lista / N.A. <input id="chkAlberca" type="checkbox"></label><label class="check">Amenidades completas <input id="chkAmenidades" type="checkbox" checked></label><label class="check">Basura retirada <input id="chkBasura" type="checkbox" checked></label>
+        </div>
+        <div class="grid-2"><div><label>Fotos de cierre</label><input id="closeFiles" type="file" multiple accept="image/*"><div class="small-note">Opcional. Si hay fotos en WhatsApp, descargarlas y subirlas aquí.</div></div><div><label>Resultado</label><select id="closeResult"><option value="revision">Lista para revisión</option><option value="incidencia">No, hay incidencia</option></select></div></div>
+        <div><label>Comentario de cierre</label><textarea id="closeComment" placeholder="Ej. Se terminó limpieza, se revisó terraza y se dejaron amenidades."></textarea></div>
+      </div>
+      <div class="modal-actions"><button class="ghost-btn" onclick="closeModal('closeModal')">Cancelar</button><button class="action-btn gold" onclick="finishCleaning()">Guardar cierre</button></div>
+    </div>
+  </div>
+
+  <div class="modal" id="issueModal">
+    <div class="modal-card">
+      <div class="modal-head"><h3>Reportar incidencia · <span id="issueUnit">Unidad</span></h3><button class="close" onclick="closeModal('issueModal')">×</button></div>
+      <div class="form">
+        <div class="grid-2"><div><label>Tipo de incidencia</label><select id="issueType"><option>Faltante</option><option>Daño</option><option>Mantenimiento</option><option>Objeto olvidado</option><option>Exceso de suciedad</option><option>Otro</option></select></div><div><label>Responsable seguimiento</label><select id="issueOwner"><option>Supervisión</option><option>Mantenimiento</option><option>Administración</option><option>Limpieza</option></select></div></div>
+        <div><label>Descripción</label><textarea id="issueDesc" placeholder="Describe el problema encontrado."></textarea></div><div><label>Evidencia</label><input id="issueFiles" type="file" multiple accept="image/*"></div><div><label>Acción tomada</label><textarea id="issueAction" placeholder="Ej. Se avisó por WhatsApp a supervisión y queda pendiente reposición."></textarea></div>
+      </div>
+      <div class="modal-actions"><button class="ghost-btn" onclick="closeModal('issueModal')">Cancelar</button><button class="action-btn gold" onclick="saveIssue()">Guardar incidencia</button></div>
+    </div>
+  </div>
+
+  <div class="modal" id="correctionModal">
+    <div class="modal-card">
+      <div class="modal-head"><h3>Mandar a corrección · <span id="correctionUnit">Unidad</span></h3><button class="close" onclick="closeModal('correctionModal')">×</button></div>
+      <div class="form">
+        <div class="grid-2"><div><label>Camarista asignada</label><select id="correctionCleaner"></select></div><div><label>Prioridad</label><select id="correctionPriority"><option>Alta</option><option>Media</option><option>Baja</option><option>Crítica</option></select></div></div>
+        <div><label>Motivo de corrección</label><textarea id="correctionComment" placeholder="Ej. Falta lavar baños / falta repasar cocina / faltan amenidades."></textarea></div>
+      </div>
+      <div class="modal-actions"><button class="ghost-btn" onclick="closeModal('correctionModal')">Cancelar</button><button class="action-btn gold" onclick="saveCorrection()">Guardar corrección</button></div>
+    </div>
+  </div>
+
+  <div class="modal" id="addModal">
+    <div class="modal-card">
+      <div class="modal-head"><h3>Agregar limpieza manual</h3><button class="close" onclick="closeModal('addModal')">×</button></div>
+      <div class="form">
+        <div class="grid-2"><div><label>Departamento</label><input id="addUnit" placeholder="Ej. Yaxché 101"></div><div><label>Tipo</label><select id="addType"><option>Salida</option><option>Entrada</option><option>Salida + Entrada</option><option>Refresh</option><option>Profunda</option><option>Retoque</option><option>Revisión</option><option>Lavar</option></select></div></div>
+        <div class="grid-2"><div><label>Prioridad</label><select id="addPriority"><option>Alta</option><option>Media</option><option>Baja</option><option>Crítica</option></select></div><div><label>Hora límite</label><input id="addLimit" type="time" value="15:00"></div></div>
+        <div class="grid-2"><div><label>Camarista</label><select id="addCleaner"></select></div><div><label>Notas</label><input id="addNotes" placeholder="Opcional"></div></div>
+      </div>
+      <div class="modal-actions"><button class="ghost-btn" onclick="closeModal('addModal')">Cancelar</button><button class="action-btn gold" onclick="saveManualCleaning()">Agregar</button></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script>
+/*
+  CONFIGURACIÓN
+  1) Pega aquí la URL /exec de tu Google Apps Script.
+  2) Si queda vacío, la web funciona en modo demo local.
+*/
+const SCRIPT_URL = "PEGAR_AQUI_URL_DE_APPS_SCRIPT";
+const ACCESS_PIN = "2026";
+const SUPERVISOR = "Fernanda";
+const STAFF = ['Sin asignar','Valeria','Yuriana','Adrián','Fernanda'];
+const START_POINT = 'Recepción / Bodega';
+const TOWER_ROUTE = ['Chaká','Chechén','Yaxché','Balché'];
+const TYPE_MAP = { 'LR':'Limpieza rápida', 'LP':'Limpieza profunda', 'LVR':'Lavar', 'R':'Refresh' };
+let cleanings = [];
+let currentUnit = '';
+let currentId = '';
+let currentFilter = 'all';
+let currentPin = '';
+let demoMode = false;
+
+function todayISO(){ const d=new Date(); d.setMinutes(d.getMinutes()-d.getTimezoneOffset()); return d.toISOString().slice(0,10); }
+document.getElementById('workDate').value = todayISO();
+
+function enterApp(){
+  const pin=document.getElementById('pin').value.trim();
+  if(pin!==ACCESS_PIN){showLoginError();return;}
+  currentPin = pin;
+  document.getElementById('login').style.display='none';
+  document.getElementById('app').style.display='block';
+  populateStaffSelects();
+  loadCleanings();
+}
+function showLoginError(){ const h=document.getElementById('loginHint'); h.textContent='PIN incorrecto. Intenta de nuevo.'; h.style.color='#ffb8a8'; }
+function isConfigured(){ return SCRIPT_URL && !SCRIPT_URL.includes('PEGAR_AQUI'); }
+
+function loadCleanings(){
+  const date = document.getElementById('workDate').value || todayISO();
+  setSync('Cargando limpiezas...');
+  if(!isConfigured()){
+    demoMode = true;
+    cleanings = demoData(date);
+    sortRecommended();
+    setSync('Modo demo. Conecta Apps Script para leer Google Sheets.');
+    return;
+  }
+  demoMode = false;
+  jsonp(`${SCRIPT_URL}?action=getCleanings&pin=${encodeURIComponent(currentPin)}&date=${encodeURIComponent(date)}`)
+    .then(res=>{
+      if(!res.ok){ throw new Error(res.error || 'No se pudieron cargar datos'); }
+      cleanings = (res.cleanings || []).map(normalizeCleaning);
+      sortRecommended();
+      setSync(`Actualizado desde Google Sheets · ${new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'})}`);
+    })
+    .catch(err=>{ setSync('Error de conexión. Se muestra demo local.'); showToast(err.message); cleanings = demoData(date); sortRecommended(); });
+}
+
+function jsonp(url){
+  return new Promise((resolve,reject)=>{
+    const cb='jsonp_'+Date.now()+'_'+Math.round(Math.random()*10000);
+    window[cb]=data=>{ resolve(data); delete window[cb]; script.remove(); };
+    const script=document.createElement('script');
+    script.src=url + (url.includes('?')?'&':'?') + 'callback=' + cb;
+    script.onerror=()=>{ reject(new Error('No se pudo conectar con Apps Script')); delete window[cb]; script.remove(); };
+    document.body.appendChild(script);
+    setTimeout(()=>{ if(window[cb]){ reject(new Error('Tiempo de espera agotado')); delete window[cb]; script.remove(); } }, 12000);
+  });
+}
+
+function postAction(payload){
+  payload.pin = currentPin;
+  payload.supervisor = SUPERVISOR;
+  payload.date = document.getElementById('workDate').value || todayISO();
+  if(!isConfigured()) return Promise.resolve();
+  return fetch(SCRIPT_URL, {method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify(payload)}).catch(()=>{});
+}
+
+function normalizeCleaning(c){
+  const status = normalizeStatus(c.status || c.Estatus || 'Pendiente');
+  const priority = normalizePriority(c.priority || c.Prioridad || 'Media');
+  return {
+    id: c.id || c.ID_Limpieza || makeId(c.Fecha || c.date || todayISO(), c.unit || c.Unidad),
+    date: c.date || c.Fecha || todayISO(),
+    unit: cleanUnit(c.unit || c.Unidad || ''),
+    type: c.type || c.Tipo_Limpieza || TYPE_MAP[c.codigo] || c.codigo || 'Limpieza',
+    priority,
+    limit: c.limit || c.Hora_Limite || '15:00',
+    cleaner: c.cleaner || c.Camarista || 'Sin asignar',
+    notes: c.notes || c.Notas || c.Observaciones || '',
+    status,
+    evidence: c.evidence || c.Evidencias_URL || '',
+    correction: c.correction || c.Correccion_Motivo || ''
+  };
+}
+function normalizeStatus(s){
+  s = String(s||'').trim().toLowerCase();
+  if(s.includes('proceso')) return 'proceso';
+  if(s.includes('revisión') || s.includes('revision') || s.includes('lista')) return 'revision';
+  if(s.includes('termin')) return 'terminada';
+  if(s.includes('corre')) return 'correccion';
+  if(s.includes('incid')) return 'incidencia';
+  if(s.includes('cancel')) return 'cancelada';
+  return 'pendiente';
+}
+function normalizePriority(p){
+  p = String(p||'media').trim().toLowerCase();
+  if(p.includes('crit')) return 'critica';
+  if(p.includes('alt')) return 'alta';
+  if(p.includes('baj')) return 'baja';
+  return 'media';
+}
+function cleanUnit(u){ return String(u||'').trim().replace(/\s+/g,' ').replace(/YAXCHE/i,'Yaxché').replace(/BALCHE/i,'Balché').replace(/CHAKA/i,'Chaká').replace(/CHECHEN/i,'Chechén'); }
+function makeId(date, unit){ return `${date}_${cleanUnit(unit).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'_')}`; }
+function demoData(date){ return [
+  {id:makeId(date,'Chaká 301'), date, unit:'Chaká 301', type:'Salida', priority:'alta', limit:'13:30', cleaner:'Valeria', notes:'', status:'pendiente'},
+  {id:makeId(date,'Chaká 302'), date, unit:'Chaká 302', type:'Refresh', priority:'media', limit:'16:00', cleaner:'Yuriana', notes:'', status:'terminada'},
+  {id:makeId(date,'Chechén 401'), date, unit:'Chechén 401', type:'Profunda', priority:'baja', limit:'17:00', cleaner:'Adrián', notes:'', status:'proceso'},
+  {id:makeId(date,'Yaxché 601'), date, unit:'Yaxché 601', type:'Salida + Entrada', priority:'critica', limit:'14:30', cleaner:'Fernanda', notes:'Piden entrar antes', status:'pendiente'},
+  {id:makeId(date,'Balché 501'), date, unit:'Balché 501', type:'Salida', priority:'alta', limit:'15:00', cleaner:'Valeria', notes:'', status:'revision'},
+  {id:makeId(date,'Balché 503'), date, unit:'Balché 503', type:'Entrada', priority:'media', limit:'15:00', cleaner:'Yuriana', notes:'', status:'correccion', correction:'Falta lavar baños'}
+]; }
+
+function parseUnit(unit){
+  const match = cleanUnit(unit).match(/^(.+?)\s+(\d{3})$/);
+  if(!match) return {tower:unit, code:'', building:99, level:99};
+  const tower = match[1].trim(); const code = match[2];
+  return {tower, code, building:Number(code[0]), level:Number(code[2])};
+}
+function towerOrder(unit){ const idx = TOWER_ROUTE.indexOf(parseUnit(unit).tower); return idx === -1 ? 99 : idx; }
+function amenityText(unit){ const {level} = parseUnit(unit); if(level === 1) return 'Alberca pequeña'; if(level === 2) return 'Terraza'; if(level === 3) return 'Rooftop + alberca'; return 'N/A'; }
+function rankPriority(p){ return p==='critica'?0:p==='alta'?1:p==='media'?2:3; }
+function timeNum(t){ return Number(String(t||'15:00').replace(':','')) || 1500; }
+function compareRoute(a,b){ const la=parseUnit(a.unit), lb=parseUnit(b.unit); return (rankPriority(a.priority)-rankPriority(b.priority)) || (towerOrder(a.unit)-towerOrder(b.unit)) || (la.building-lb.building) || (la.level-lb.level) || (timeNum(a.limit)-timeNum(b.limit)); }
+function compareTime(a,b){ return timeNum(a.limit)-timeNum(b.limit); }
+function compareLocation(a,b){ const la=parseUnit(a.unit), lb=parseUnit(b.unit); return (towerOrder(a.unit)-towerOrder(b.unit)) || (la.building-lb.building) || (la.level-lb.level) || (rankPriority(a.priority)-rankPriority(b.priority)); }
+function sortRecommended(el){ setSortActive(el); cleanings.sort(compareRoute); render(); }
+function sortByTime(el){ setSortActive(el); cleanings.sort(compareTime); render(); }
+function sortByTower(el){ setSortActive(el); cleanings.sort(compareLocation); render(); }
+function setSortActive(el){ if(el){ document.querySelectorAll('.sort-pill').forEach(x=>x.classList.remove('active')); el.classList.add('active'); } }
+function render(){
+  const board=document.getElementById('board'); board.innerHTML='';
+  const visible = cleanings.filter(c=>currentFilter==='all'||c.status===currentFilter);
+  if(!visible.length){ board.innerHTML = `<div class="empty">No hay limpiezas en esta vista.</div>`; }
+  visible.forEach((c,idx)=>board.insertAdjacentHTML('beforeend', cardHTML(c, idx)));
+  renderRoute(); refreshStats();
+}
+function cardHTML(c, idx){
+  const first = idx < 4 && !['terminada','cancelada'].includes(c.status) ? `<div class="suggested">Ruta ${idx+1}</div>` : '';
+  const options = STAFF.map(n=>`<option ${n===c.cleaner?'selected':''}>${n}</option>`).join('');
+  const statusText = ({pendiente:'Pendiente', proceso:'En proceso', revision:'Lista para revisión', terminada:'Terminada', incidencia:'Con incidencia', correccion:'Corrección requerida', cancelada:'Cancelada'})[c.status] || c.status;
+  const correction = c.correction ? `<div><span>Corrección</span><strong>${escapeHTML(c.correction)}</strong></div>` : '';
+  return `<article class="card ${c.status}" data-status="${c.status}" data-unit="${escapeHTML(c.unit)}">${first}<div class="card-top"></div><div class="card-body"><div class="unit-row"><div class="unit">${escapeHTML(c.unit)}</div><span class="badge ${c.priority}">${priorityLabel(c.priority)}</span></div><div class="status ${c.status}">${statusText}</div><div class="cleaner-row"><span>Camarista</span><select class="cleaner-select" onchange="assignCleaner('${escapeAttr(c.id)}', this.value)">${options}</select></div><div class="meta"><div><span>Tipo</span><strong>${escapeHTML(c.type)}</strong></div><div><span>Límite</span><strong>${escapeHTML(c.limit)}</strong></div><div><span>Ubicación</span><strong>${escapeHTML(c.unit)}</strong></div><div><span>Extra</span><strong>${amenityText(c.unit)}</strong></div>${c.notes?`<div><span>Notas</span><strong>${escapeHTML(c.notes)}</strong></div>`:''}${correction}</div><div class="actions">${actionButtons(c)}</div></div></article>`;
+}
+function actionButtons(c){
+  if(c.status==='terminada') return `<button class="ghost-btn" onclick="showToast('Evidencia: ${c.evidence ? 'ver links en Sheets/Drive' : 'sin evidencia registrada'}')">Ver evidencia</button><button class="action-btn gold" onclick="openCorrection('${escapeAttr(c.id)}')">Corregir</button>`;
+  if(c.status==='revision') return `<button class="action-btn blue" onclick="approveCleaning('${escapeAttr(c.id)}')">Aprobar</button><button class="action-btn gold" onclick="openCorrection('${escapeAttr(c.id)}')">Corregir</button><button class="ghost-btn full" onclick="openIssue('${escapeAttr(c.id)}')">Problema</button>`;
+  if(c.status==='proceso' || c.status==='correccion') return `<button class="action-btn gold" onclick="openClose('${escapeAttr(c.id)}')">Terminar</button><button class="ghost-btn" onclick="openIssue('${escapeAttr(c.id)}')">Problema</button>`;
+  if(c.status==='incidencia') return `<button class="action-btn" onclick="openIssue('${escapeAttr(c.id)}')">Actualizar</button><button class="ghost-btn" onclick="openClose('${escapeAttr(c.id)}')">Cerrar</button>`;
+  return `<button class="action-btn" onclick="setStatus('${escapeAttr(c.id)}','proceso')">Iniciar</button><button class="ghost-btn" onclick="openIssue('${escapeAttr(c.id)}')">Problema</button><button class="action-btn gold full" onclick="openClose('${escapeAttr(c.id)}')">Terminar</button>`;
+}
+function priorityLabel(p){ return p==='critica'?'Crítica':p==='alta'?'Alta':p==='media'?'Media':'Baja'; }
+function renderRoute(){
+  const route=document.getElementById('routeList');
+  const active=cleanings.filter(c=>!['terminada','cancelada'].includes(c.status)).slice().sort(compareRoute).slice(0,6);
+  route.innerHTML = `<h2 class="section-title" style="font-size:22px;margin-top:8px">Ruta sugerida</h2><p class="section-note" style="margin-bottom:4px">Prioridad antes que ubicación. Dentro de cada prioridad: ${START_POINT} → ${TOWER_ROUTE.join(' → ')}.</p>` + active.map((c,i)=>`<div class="route-item"><div class="route-no">${i+1}</div><div><strong>${escapeHTML(c.unit)}</strong><span>${escapeHTML(c.limit)} · ${escapeHTML(c.cleaner)} · ${amenityText(c.unit)}</span></div><div class="route-tag">${priorityLabel(c.priority)}</div></div>`).join('');
+}
+function filterCards(status, el){ currentFilter=status; document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); el.classList.add('active'); render(); }
+function findById(id){ return cleanings.find(x=>x.id===id); }
+function assignCleaner(id, value){ const c=findById(id); if(!c) return; c.cleaner=value; postAction({action:'assignCleaner', id:c.id, cleaner:value}); renderRoute(); showToast(`Camarista asignada: ${c.unit} · ${value}`); }
+function setStatus(id,status, comment=''){ const c=findById(id); if(!c)return; const old=c.status; c.status=status; postAction({action:'updateStatus', id:c.id, status, oldStatus:old, comment}); render(); showToast(`Estatus actualizado: ${c.unit}`); }
+function approveCleaning(id){ setStatus(id, 'terminada', 'Aprobado por supervisión'); }
+function openClose(id){ currentId=id; const c=findById(id); if(!c)return; currentUnit=c.unit; document.getElementById('closeUnit').textContent=c.unit; document.getElementById('closeModal').style.display='flex'; }
+function openIssue(id){ currentId=id; const c=findById(id); if(!c)return; currentUnit=c.unit; document.getElementById('issueUnit').textContent=c.unit; document.getElementById('issueModal').style.display='flex'; }
+function openCorrection(id){ currentId=id; const c=findById(id); if(!c)return; currentUnit=c.unit; document.getElementById('correctionUnit').textContent=c.unit; document.getElementById('correctionCleaner').value=c.cleaner || 'Sin asignar'; document.getElementById('correctionPriority').value=priorityLabel(c.priority); document.getElementById('correctionComment').value=''; document.getElementById('correctionModal').style.display='flex'; }
+function openAdd(){ document.getElementById('addUnit').value=''; document.getElementById('addNotes').value=''; document.getElementById('addModal').style.display='flex'; }
+function closeModal(id){ document.getElementById(id).style.display='none'; }
+async function finishCleaning(){
+  const c=findById(currentId); if(!c)return;
+  const status = document.getElementById('closeResult').value;
+  const comment = document.getElementById('closeComment').value.trim();
+  const files = await filesToBase64(document.getElementById('closeFiles').files);
+  c.status=status; c.evidence = files.length ? 'Subido a Drive' : c.evidence;
+  postAction({action:'closeCleaning', id:c.id, status, comment, checklist:getChecklist(), files});
+  closeModal('closeModal'); render(); showToast(status==='revision'?'Lista para revisión.':'Se registró incidencia.');
+  document.getElementById('closeFiles').value=''; document.getElementById('closeComment').value='';
+}
+async function saveIssue(){
+  const c=findById(currentId); if(!c)return;
+  const files = await filesToBase64(document.getElementById('issueFiles').files);
+  c.status='incidencia';
+  postAction({action:'saveIssue', id:c.id, unit:c.unit, type:document.getElementById('issueType').value, owner:document.getElementById('issueOwner').value, description:document.getElementById('issueDesc').value.trim(), taken:document.getElementById('issueAction').value.trim(), files});
+  closeModal('issueModal'); render(); showToast('Incidencia registrada.');
+  document.getElementById('issueFiles').value=''; document.getElementById('issueDesc').value=''; document.getElementById('issueAction').value='';
+}
+function saveCorrection(){
+  const c=findById(currentId); if(!c)return;
+  c.status='correccion'; c.cleaner=document.getElementById('correctionCleaner').value; c.priority=normalizePriority(document.getElementById('correctionPriority').value); c.correction=document.getElementById('correctionComment').value.trim();
+  postAction({action:'correction', id:c.id, cleaner:c.cleaner, priority:c.priority, comment:c.correction});
+  closeModal('correctionModal'); sortRecommended(); showToast('Corrección registrada.');
+}
+function saveManualCleaning(){
+  const date = document.getElementById('workDate').value || todayISO();
+  const unit = cleanUnit(document.getElementById('addUnit').value);
+  if(!unit){ showToast('Falta departamento.'); return; }
+  const c = normalizeCleaning({id:makeId(date,unit), date, unit, type:document.getElementById('addType').value, priority:document.getElementById('addPriority').value, limit:document.getElementById('addLimit').value, cleaner:document.getElementById('addCleaner').value, notes:document.getElementById('addNotes').value, status:'Pendiente'});
+  cleanings.push(c);
+  postAction({action:'addCleaning', cleaning:c});
+  closeModal('addModal'); sortRecommended(); showToast('Limpieza agregada.');
+}
+function getChecklist(){ return {recamaras:chkRecamaras.checked, banos:chkBanos.checked, cocina:chkCocina.checked, sala:chkSala.checked, terraza:chkTerraza.checked, alberca:chkAlberca.checked, amenidades:chkAmenidades.checked, basura:chkBasura.checked}; }
+function filesToBase64(fileList){
+  const files = Array.from(fileList||[]);
+  return Promise.all(files.map(file=>new Promise(resolve=>{ const reader=new FileReader(); reader.onload=()=>resolve({name:file.name, mimeType:file.type||'application/octet-stream', data:reader.result}); reader.onerror=()=>resolve(null); reader.readAsDataURL(file); }))).then(arr=>arr.filter(Boolean));
+}
+function refreshStats(){
+  const total=cleanings.length || 1; const pending=cleanings.filter(c=>c.status==='pendiente').length; const process=cleanings.filter(c=>c.status==='proceso').length; const review=cleanings.filter(c=>c.status==='revision').length; const correction=cleanings.filter(c=>c.status==='correccion').length; const issue=cleanings.filter(c=>c.status==='incidencia').length; const done=cleanings.filter(c=>c.status==='terminada').length;
+  document.getElementById('totalStat').textContent=cleanings.length; document.getElementById('pendingStat').textContent=pending; document.getElementById('processStat').textContent=process; document.getElementById('doneStat').textContent=done;
+  document.getElementById('progressPct').textContent=cleanings.length?Math.round((done/cleanings.length)*100)+'%':'0%';
+  document.getElementById('segPending').style.width=(pending/total*100)+'%'; document.getElementById('segProcess').style.width=(process/total*100)+'%'; document.getElementById('segReview').style.width=(review/total*100)+'%'; document.getElementById('segCorrection').style.width=(correction/total*100)+'%'; document.getElementById('segIssue').style.width=(issue/total*100)+'%'; document.getElementById('segDone').style.width=(done/total*100)+'%';
+}
+function populateStaffSelects(){
+  ['correctionCleaner','addCleaner'].forEach(id=>{ const s=document.getElementById(id); if(s) s.innerHTML=STAFF.map(n=>`<option>${n}</option>`).join(''); });
+}
+function setSync(msg){ document.getElementById('syncStatus').textContent=msg; }
+function escapeHTML(str){ return String(str||'').replace(/[&<>"]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
+function escapeAttr(str){ return escapeHTML(str).replace(/'/g,'&#39;'); }
+function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.style.display='block'; clearTimeout(window._toast); window._toast=setTimeout(()=>t.style.display='none',3200); }
+</script>
+</body>
+</html>
