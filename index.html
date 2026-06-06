@@ -30,14 +30,16 @@
     .hint{font-size:12px;color:rgba(244,239,228,.65);margin-top:18px;line-height:1.5}
     .app{display:none;}
     .topbar{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:24px;color:var(--cream);}
-    .brand{display:flex;align-items:center;gap:16px;}
+    .brand{display:flex;align-items:center;gap:16px;min-width:280px;}
     .logo{width:38px;height:38px;border:1px solid var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:Georgia,serif;color:var(--gold);}
     .brand-title{font-family:Georgia,serif;font-size:34px;font-weight:400;line-height:1;margin:0;}
     .brand-meta{font-size:10px;letter-spacing:.34em;text-transform:uppercase;color:var(--gold);margin-top:7px;}
-    .right-tools{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
-    .date-pill,.mode-pill{border:1px solid rgba(209,177,113,.45);border-radius:999px;padding:12px 16px;color:var(--cream);font-size:13px;background:rgba(255,255,255,.04)}
-    .date-input{border:0;background:transparent;color:inherit;outline:none;min-width:120px}
-    .mode-pill{cursor:pointer;font-weight:800;text-transform:uppercase;letter-spacing:.06em;font-size:11px}
+    .right-tools{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end;max-width:520px}
+    .date-pill,.mode-pill{border:1px solid rgba(209,177,113,.45);border-radius:999px;padding:12px 16px;color:var(--green);font-size:13px;background:rgba(255,250,241,.88)}
+    .date-pill{display:flex;align-items:center;gap:10px;min-width:245px;justify-content:center}
+    .date-label{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold-2);font-weight:900}
+    .date-input{border:0;background:transparent;color:var(--green);outline:none;min-width:138px;font-weight:800}
+    .mode-pill{cursor:pointer;font-weight:800;text-transform:uppercase;letter-spacing:.06em;font-size:11px;min-width:120px;text-align:center}
     .layout{display:grid;grid-template-columns:390px 1fr;gap:22px;align-items:start;}
     .panel{background:rgba(255,250,241,.94);border:1px solid rgba(209,177,113,.32);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;}
     .panel-pad{padding:22px;}
@@ -76,8 +78,9 @@
     .card{background:#fffdf8;border:1px solid rgba(11,42,27,.12);border-radius:22px;padding:0;overflow:hidden;box-shadow:0 12px 28px rgba(33,31,25,.08);position:relative;}
     .card-top{height:8px;background:var(--sand)}.card.pendiente .card-top{background:var(--danger)}.card.proceso .card-top{background:var(--warn)}.card.revision .card-top{background:var(--blue)}.card.terminada .card-top{background:var(--ok)}.card.incidencia .card-top{background:#5e2e25}.card.correccion .card-top{background:var(--correction)}
     .card-body{padding:18px;}.unit-row{display:flex;justify-content:space-between;gap:12px;align-items:start;margin-bottom:12px;}.unit{font-family:Georgia,serif;font-size:28px;color:var(--green);line-height:1.05;text-transform:capitalize;}
-    .suggested{position:absolute;top:16px;right:16px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:900;border-radius:999px;padding:7px 9px;background:var(--green);color:var(--cream);box-shadow:0 8px 18px rgba(0,0,0,.14)}
-    .badge{font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:900;border-radius:999px;padding:7px 10px;white-space:nowrap;}
+    .tag-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    .suggested{font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:900;border-radius:999px;padding:7px 9px;background:var(--green);color:var(--cream);box-shadow:0 8px 18px rgba(0,0,0,.10);display:inline-flex;align-items:center}
+    .badge{font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:900;border-radius:999px;padding:7px 10px;white-space:nowrap;display:inline-flex;align-items:center;}
     .badge.critica{background:#5e2e25;color:#fff}.badge.alta{background:var(--danger-soft);color:var(--danger)}.badge.media{background:var(--warn-soft);color:var(--warn)}.badge.baja{background:var(--ok-soft);color:var(--ok)}
     .meta{display:grid;gap:8px;font-size:13px;color:#39443b;margin:16px 0;}.meta div{display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid rgba(11,42,27,.08);padding-bottom:7px;}.meta span:first-child{color:var(--muted)}.meta strong{text-align:right}
     .cleaner-row{display:grid;grid-template-columns:92px 1fr;gap:10px;align-items:center;border-bottom:1px solid rgba(11,42,27,.08);padding-bottom:8px;margin-bottom:6px;font-size:13px}.cleaner-row span{color:var(--muted)}
@@ -89,6 +92,7 @@
     .small-note{font-size:11px;color:var(--muted);line-height:1.45;margin-top:8px}
     .loader{font-size:12px;color:var(--muted);margin-top:8px}
     @media (max-width:1150px){.layout{grid-template-columns:1fr}.board{grid-template-columns:repeat(2,1fr)}.topbar{color:var(--green)}body{background:#f5efe2}.date-pill,.mode-pill{color:var(--green);background:#fffdf8}}
+    @media (max-width:720px){.shell{padding:14px}.topbar{align-items:flex-start}.brand-title{font-size:28px}.right-tools{width:100%;justify-content:flex-start}.date-pill{min-width:100%;justify-content:space-between}.mode-pill{min-width:100%}.board{grid-template-columns:1fr}.grid-2,.checkgrid{grid-template-columns:1fr}.layout{gap:14px}}
     @media (max-width:720px){.shell{padding:14px}.board{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}.brand-title{font-size:28px}.grid-2,.checkgrid{grid-template-columns:1fr}.actions{grid-template-columns:1fr}.login h1{font-size:52px}.main-head{display:block}.tabs{margin-top:12px}.layout{gap:14px}.right-tools{justify-content:flex-start}.topbar{align-items:flex-start;flex-direction:column}.legend{grid-template-columns:1fr}.modal-actions{flex-direction:column}}
   </style>
 </head>
@@ -113,7 +117,7 @@
           <div><h1 class="brand-title">Control de Limpiezas</h1><div class="brand-meta">Aldea Mayab · Supervisión diaria</div></div>
         </div>
         <div class="right-tools">
-          <div class="date-pill"><input class="date-input" type="date" id="workDate" onchange="loadCleanings()" /></div>
+          <div class="date-pill"><span class="date-label">Fecha</span><input class="date-input" type="date" id="workDate" onchange="loadCleanings()" /></div>
           <button class="mode-pill" onclick="loadCleanings()">Actualizar</button>
         </div>
       </header>
@@ -229,7 +233,8 @@
   1) Pega aquí la URL /exec de tu Google Apps Script.
   2) Si queda vacío, la web funciona en modo demo local.
 */
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxzJFYSAsc9JASUKnLSsTJtCB16OFFGSUUZUhvM-kl3lrZXsWtKANsKOGWv13DgVJIyWg/exec";
+const SCRIPT_URL = "PEGAR_AQUI_URL_DE_APPS_SCRIPT";
+const APP_VERSION = '2.1';
 const ACCESS_PIN = "2026";
 const SUPERVISOR = "Fernanda";
 const STAFF = ['Sin asignar','Valeria','Yuriana','Adrián','Fernanda'];
@@ -369,11 +374,25 @@ function render(){
   renderRoute(); refreshStats();
 }
 function cardHTML(c, idx){
-  const first = idx < 4 && !['terminada','cancelada'].includes(c.status) ? `<div class="suggested">Ruta ${idx+1}</div>` : '';
-  const options = STAFF.map(n=>`<option ${n===c.cleaner?'selected':''}>${n}</option>`).join('');
-  const statusText = ({pendiente:'Pendiente', proceso:'En proceso', revision:'Lista para revisión', terminada:'Terminada', incidencia:'Con incidencia', correccion:'Corrección requerida', cancelada:'Cancelada'})[c.status] || c.status;
+  const options = STAFF.map(n=>`<option ${c.cleaner===n?'selected':''}>${n}</option>`).join('');
+  const statusText = statusLabel(c.status);
+  const routeTag = idx < 9 ? `<span class="suggested">Ruta ${idx+1}</span>` : '';
   const correction = c.correction ? `<div><span>Corrección</span><strong>${escapeHTML(c.correction)}</strong></div>` : '';
-  return `<article class="card ${c.status}" data-status="${c.status}" data-unit="${escapeHTML(c.unit)}">${first}<div class="card-top"></div><div class="card-body"><div class="unit-row"><div class="unit">${escapeHTML(c.unit)}</div><span class="badge ${c.priority}">${priorityLabel(c.priority)}</span></div><div class="status ${c.status}">${statusText}</div><div class="cleaner-row"><span>Camarista</span><select class="cleaner-select" onchange="assignCleaner('${escapeAttr(c.id)}', this.value)">${options}</select></div><div class="meta"><div><span>Tipo</span><strong>${escapeHTML(c.type)}</strong></div><div><span>Límite</span><strong>${escapeHTML(c.limit)}</strong></div><div><span>Ubicación</span><strong>${escapeHTML(c.unit)}</strong></div><div><span>Extra</span><strong>${amenityText(c.unit)}</strong></div>${c.notes?`<div><span>Notas</span><strong>${escapeHTML(c.notes)}</strong></div>`:''}${correction}</div><div class="actions">${actionButtons(c)}</div></div></article>`;
+  return `<article class="card ${c.status}" data-status="${c.status}" data-unit="${escapeHTML(c.unit)}">
+    <div class="card-top"></div>
+    <div class="card-body">
+      <div class="unit-row">
+        <div>
+          <div class="unit">${escapeHTML(c.unit)}</div>
+          <div class="tag-row">${routeTag}<span class="badge ${c.priority}">${priorityLabel(c.priority)}</span></div>
+        </div>
+      </div>
+      <div class="status ${c.status}">${statusText}</div>
+      <div class="cleaner-row"><span>Camarista</span><select class="cleaner-select" onchange="assignCleaner('${escapeAttr(c.id)}', this.value)">${options}</select></div>
+      <div class="meta"><div><span>Tipo</span><strong>${escapeHTML(c.type)}</strong></div><div><span>Límite</span><strong>${escapeHTML(c.limit)}</strong></div><div><span>Ubicación</span><strong>${escapeHTML(c.unit)}</strong></div><div><span>Extra</span><strong>${amenityText(c.unit)}</strong></div>${c.notes?`<div><span>Notas</span><strong>${escapeHTML(c.notes)}</strong></div>`:''}${correction}</div>
+      <div class="actions">${actionButtons(c)}</div>
+    </div>
+  </article>`;
 }
 function actionButtons(c){
   if(c.status==='terminada') return `<button class="ghost-btn" onclick="showToast('Evidencia: ${c.evidence ? 'ver links en Sheets/Drive' : 'sin evidencia registrada'}')">Ver evidencia</button><button class="action-btn gold" onclick="openCorrection('${escapeAttr(c.id)}')">Corregir</button>`;
