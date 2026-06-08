@@ -243,7 +243,7 @@
   2) Si queda vacío, la web funciona en modo demo local.
 */
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxzJFYSAsc9JASUKnLSsTJtCB16OFFGSUUZUhvM-kl3lrZXsWtKANsKOGWv13DgVJIyWg/exec";
-const APP_VERSION = '2.3';
+const APP_VERSION = '2.4';
 const ACCESS_PIN = "2026";
 const SUPERVISOR = "Fernanda";
 const STAFF = ['Sin asignar','Valeria','Yuriana','Adrián','Fernanda'];
@@ -302,7 +302,7 @@ function loadCleanings(){
       setSync(`Actualizado desde Google Sheets · ${new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'})}`);
       if(!cleanings.length) showToast('Conectó, pero no encontró limpiezas para esta fecha. Revisa columnas de días o fecha seleccionada.');
     })
-    .catch(err=>{ setSync('Error de conexión. Revisa diagnóstico.'); showToast(err.message); cleanings = []; sortRecommended(); });
+    .catch(err=>{ setSync('Error al cargar o mostrar limpiezas.'); showToast(err.message); cleanings = []; sortRecommended(); });
 }
 
 function testConnection(){
@@ -388,6 +388,18 @@ function normalizeStatus(s){
   if(s.includes('incid')) return 'incidencia';
   if(s.includes('cancel')) return 'cancelada';
   return 'pendiente';
+}
+function statusLabel(status){
+  const labels = {
+    pendiente: 'Pendiente',
+    proceso: 'En proceso',
+    revision: 'Lista para revisión',
+    terminada: 'Terminada',
+    correccion: 'Corrección requerida',
+    incidencia: 'Con incidencia',
+    cancelada: 'Cancelada'
+  };
+  return labels[normalizeStatus(status)] || 'Pendiente';
 }
 function normalizePriority(p){
   p = String(p||'media').trim().toLowerCase();
