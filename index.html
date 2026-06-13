@@ -97,6 +97,22 @@
     @media (max-width:1150px){.layout{grid-template-columns:1fr}.board{grid-template-columns:repeat(2,1fr)}.topbar{color:var(--green)}body{background:#f5efe2}.date-pill,.mode-pill{color:var(--green);background:#fffdf8}}
     @media (max-width:720px){.shell{padding:14px}.topbar{align-items:flex-start}.brand-title{font-size:28px}.right-tools{width:100%;justify-content:flex-start}.date-pill{min-width:100%;justify-content:space-between}.mode-pill{min-width:100%}.board{grid-template-columns:1fr}.grid-2,.checkgrid{grid-template-columns:1fr}.layout{gap:14px}}
     @media (max-width:720px){.shell{padding:14px}.board{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}.brand-title{font-size:28px}.grid-2,.checkgrid{grid-template-columns:1fr}.actions{grid-template-columns:1fr}.login h1{font-size:52px}.main-head{display:block}.tabs{margin-top:12px}.layout{gap:14px}.right-tools{justify-content:flex-start}.topbar{align-items:flex-start;flex-direction:column}.legend{grid-template-columns:1fr}.modal-actions{flex-direction:column}}
+
+    .modal-card-wide{width:min(980px,100%)}
+    .review-intro{background:#fffdf8;border:1px solid rgba(11,42,27,.12);border-radius:18px;padding:14px 16px;color:var(--muted);font-size:13px;line-height:1.45}
+    .unit-features{display:flex;gap:8px;flex-wrap:wrap}
+    .feature-pill{background:var(--green);color:var(--cream);border-radius:999px;padding:8px 10px;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.06em}
+    .review-checklist{display:grid;grid-template-columns:repeat(2,minmax(240px,1fr));gap:12px}
+    .review-area{background:#fffdf8;border:1px solid rgba(11,42,27,.12);border-radius:18px;padding:14px}
+    .review-area-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;color:var(--green);font-weight:900;text-transform:uppercase;letter-spacing:.07em;font-size:12px}
+    .review-area-head input{width:22px;height:22px;accent-color:var(--green)}
+    .review-list{margin:0;padding-left:18px;color:#39443b;font-size:12px;line-height:1.55}
+    .review-list li{margin:2px 0}
+    .badge.tipo{background:#eef1e8;color:var(--green);border:1px solid rgba(11,42,27,.10)}
+    .loading-overlay{display:none;position:fixed;inset:0;z-index:60;background:rgba(244,239,228,.82);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:24px}
+    .loading-card{width:min(360px,92vw);background:#fffaf1;border:1px solid var(--gold);border-radius:24px;box-shadow:var(--shadow);padding:28px;text-align:center;color:var(--green)}
+    .dog-loader{font-size:44px;line-height:1;margin-bottom:12px;animation:dogSpin 1s linear infinite}.loading-card strong{display:block;font-family:Georgia,serif;font-size:26px;font-weight:400;margin-bottom:8px}.loading-card span{font-size:13px;color:var(--muted);line-height:1.45}
+    @keyframes dogSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
   </style>
 </head>
 <body>
@@ -164,7 +180,7 @@
         <section class="panel">
           <div class="panel-pad">
             <div class="main-head">
-              <div><h2 class="section-title">Limpiezas de hoy</h2><p class="section-note">Prioridad primero; después ruta física: bodega → Chaká → Chechén → Yaxché → Balché. Ubicación muestra solo el departamento.</p></div>
+              <div><h2 class="section-title">Limpiezas de hoy</h2><p class="section-note">Orden operativo: Refresh → LR → LP → LVR. Después ruta física: bodega → Chaká → Chechén → Yaxché → Balché.</p></div>
               <div class="tabs">
                 <button class="tab active" onclick="filterCards('all', this)">Todas</button>
                 <button class="tab" onclick="filterCards('pendiente', this)">Pendientes</button>
@@ -187,16 +203,19 @@
   </main>
 
   <div class="modal" id="closeModal">
-    <div class="modal-card">
-      <div class="modal-head"><h3>Terminar limpieza · <span id="closeUnit">Unidad</span></h3><button class="close" onclick="closeModal('closeModal')">×</button></div>
+    <div class="modal-card modal-card-wide">
+      <div class="modal-head"><h3><span id="closeModalTitle">Revisión de limpieza</span> · <span id="closeUnit">Unidad</span></h3><button class="close" onclick="closeModal('closeModal')">×</button></div>
       <div class="form">
-        <div class="checkgrid">
-          <label class="check">Recámaras listas <input id="chkRecamaras" type="checkbox" checked></label><label class="check">Baños listos <input id="chkBanos" type="checkbox" checked></label><label class="check">Cocina lista <input id="chkCocina" type="checkbox" checked></label><label class="check">Sala / comedor <input id="chkSala" type="checkbox" checked></label><label class="check">Terraza / rooftop <input id="chkTerraza" type="checkbox"></label><label class="check">Alberca lista / N.A. <input id="chkAlberca" type="checkbox"></label><label class="check">Amenidades completas <input id="chkAmenidades" type="checkbox" checked></label><label class="check">Basura retirada <input id="chkBasura" type="checkbox" checked></label>
+        <div class="review-intro" id="reviewIntro">Usa este checklist como apoyo visual. Las fotos y evidencias se manejarán por WhatsApp.</div>
+        <div class="unit-features" id="unitFeatures"></div>
+        <div class="review-checklist" id="supervisionChecklist"></div>
+        <div class="grid-2">
+          <div><label>Resultado</label><select id="closeResult"></select></div>
+          <div><label>Comentario de supervisión</label><textarea id="closeComment" placeholder="Ej. Aprobado. Falta repasar espejo del baño. Se avisó por WhatsApp."></textarea></div>
         </div>
-        <div class="grid-2"><div><label>Fotos de cierre</label><input id="closeFiles" type="file" multiple accept="image/*"><div class="small-note">Opcional. Si hay fotos en WhatsApp, descargarlas y subirlas aquí.</div></div><div><label>Resultado</label><select id="closeResult"><option value="revision">Lista para revisión</option><option value="incidencia">No, hay incidencia</option></select></div></div>
-        <div><label>Comentario de cierre</label><textarea id="closeComment" placeholder="Ej. Se terminó limpieza, se revisó terraza y se dejaron amenidades."></textarea></div>
+        <div class="small-note">No se suben fotos aquí. Si hay evidencia, compártela por WhatsApp y deja el comentario correspondiente.</div>
       </div>
-      <div class="modal-actions"><button class="ghost-btn" onclick="closeModal('closeModal')">Cancelar</button><button class="action-btn gold" onclick="finishCleaning()">Guardar cierre</button></div>
+      <div class="modal-actions"><button class="ghost-btn" onclick="closeModal('closeModal')">Cancelar</button><button class="action-btn gold" onclick="finishCleaning()" id="closeSaveBtn">Guardar</button></div>
     </div>
   </div>
 
@@ -234,6 +253,14 @@
     </div>
   </div>
 
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-card">
+      <div class="dog-loader">🐶</div>
+      <strong>Cargando información</strong>
+      <span id="loadingText">Actualizando reservas y limpiezas del día. Espera unos segundos.</span>
+    </div>
+  </div>
+
   <div class="toast" id="toast"></div>
 
 <script>
@@ -243,10 +270,10 @@
   2) Si queda vacío, la web funciona en modo demo local.
 */
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxzJFYSAsc9JASUKnLSsTJtCB16OFFGSUUZUhvM-kl3lrZXsWtKANsKOGWv13DgVJIyWg/exec";
-const APP_VERSION = '2.4';
+const APP_VERSION = '2.5';
 const ACCESS_PIN = "2026";
 const SUPERVISOR = "Fernanda";
-const STAFF = ['Sin asignar','Valeria','Yuriana','Adrián','Fernanda'];
+const STAFF = ['Sin asignar','V+Y','Valeria','Yuriana','Adrián','Fernanda'];
 const START_POINT = 'Recepción / Bodega';
 const TOWER_ROUTE = ['Chaká','Chechén','Yaxché','Balché'];
 const TYPE_MAP = { 'LR':'Limpieza rápida', 'LP':'Limpieza profunda', 'LVR':'Lavar', 'R':'Refresh' };
@@ -254,6 +281,7 @@ let cleanings = [];
 let currentUnit = '';
 let currentId = '';
 let currentFilter = 'all';
+let currentCloseMode = 'close';
 let currentPin = '';
 let demoMode = false;
 
@@ -286,11 +314,13 @@ function isConfigured(){ return SCRIPT_URL && !SCRIPT_URL.includes('PEGAR_AQUI')
 function loadCleanings(){
   const date = document.getElementById('workDate').value || todayISO();
   setSync('Cargando limpiezas...');
+  showLoading('Actualizando reservas y limpiezas del día.');
   if(!isConfigured()){
     demoMode = true;
     cleanings = demoData(date);
     sortRecommended();
     setSync('Modo demo. Conecta Apps Script para leer Google Sheets.');
+    hideLoading();
     return;
   }
   demoMode = false;
@@ -302,7 +332,8 @@ function loadCleanings(){
       setSync(`Actualizado desde Google Sheets · ${new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'})}`);
       if(!cleanings.length) showToast('Conectó, pero no encontró limpiezas para esta fecha. Revisa columnas de días o fecha seleccionada.');
     })
-    .catch(err=>{ setSync('Error al cargar o mostrar limpiezas.'); showToast(err.message); cleanings = []; sortRecommended(); });
+    .catch(err=>{ setSync('Error al cargar o mostrar limpiezas.'); showToast(err.message); cleanings = []; sortRecommended(); })
+    .finally(()=>hideLoading());
 }
 
 function testConnection(){
@@ -311,7 +342,7 @@ function testConnection(){
   jsonp(`${SCRIPT_URL}?action=debugSheets&pin=${encodeURIComponent(currentPin)}`)
     .then(res=>{
       if(!res.ok){ throw new Error(res.error || 'Diagnóstico sin respuesta OK'); }
-      const detected = res.planSheetDetected || 'NO DETECTADA';
+      const detected = res.planSheetDetected || res.planSheetName || 'NO DETECTADA';
       const names = (res.sheets || []).join(', ');
       setSync(`Conexión OK · Matriz: ${detected}`);
       showToast(`Conexión OK. Matriz: ${detected}. Hojas: ${names}`);
@@ -364,12 +395,13 @@ function postAction(payload){
 
 function normalizeCleaning(c){
   const status = normalizeStatus(c.status || c.Estatus || 'Pendiente');
-  const priority = normalizePriority(c.priority || c.Prioridad || 'Media');
+  const type = c.type || c.Tipo_Limpieza || TYPE_MAP[c.codigo] || c.codigo || 'Limpieza';
+  const priority = priorityByType(type, normalizePriority(c.priority || c.Prioridad || 'Media'));
   return {
     id: c.id || c.ID_Limpieza || makeId(c.Fecha || c.date || todayISO(), c.unit || c.Unidad),
     date: c.date || c.Fecha || todayISO(),
     unit: cleanUnit(c.unit || c.Unidad || ''),
-    type: c.type || c.Tipo_Limpieza || TYPE_MAP[c.codigo] || c.codigo || 'Limpieza',
+    type,
     priority,
     limit: c.limit || c.Hora_Limite || '15:00',
     cleaner: c.cleaner || c.Camarista || 'Sin asignar',
@@ -426,12 +458,44 @@ function parseUnit(unit){
   return {tower, code, building:Number(code[0]), level:Number(code[2])};
 }
 function towerOrder(unit){ const idx = TOWER_ROUTE.indexOf(parseUnit(unit).tower); return idx === -1 ? 99 : idx; }
-function amenityText(unit){ const {level} = parseUnit(unit); if(level === 1) return 'Alberca pequeña'; if(level === 2) return 'Terraza'; if(level === 3) return 'Rooftop + alberca'; return 'N/A'; }
+function amenityText(unit){
+  const {level} = parseUnit(unit);
+  if(level === 1) return 'Alberca + terraza';
+  if(level === 2) return 'Terraza';
+  if(level === 3) return 'Rooftop';
+  return 'N/A';
+}
+function unitFeatures(unit){
+  const {level} = parseUnit(unit);
+  if(level === 1) return ['Alberca', 'Terraza'];
+  if(level === 2) return ['Terraza'];
+  if(level === 3) return ['Rooftop'];
+  return [];
+}
+function typeKey(type){
+  const t = String(type || '').toLowerCase();
+  if(t.includes('refresh') || t === 'r') return 'refresh';
+  if(t.includes('rápida') || t.includes('rapida') || t === 'lr' || t.includes('salida + entrada')) return 'lr';
+  if(t.includes('profunda') || t === 'lp' || t === 'profunda' || t.includes('salida')) return 'lp';
+  if(t.includes('lavar') || t === 'lvr') return 'lvr';
+  if(t.includes('entrada')) return 'refresh';
+  return 'otros';
+}
+function rankType(c){ return ({refresh:0, lr:1, lp:2, lvr:3, otros:4})[typeKey(c.type)] ?? 4; }
+function typeLabel(c){ return ({refresh:'Refresh', lr:'LR', lp:'LP', lvr:'LVR', otros:c.type || 'Limpieza'})[typeKey(c.type)] || c.type || 'Limpieza'; }
+function priorityByType(type, fallback){
+  const k = typeKey(type);
+  if(k === 'refresh') return 'alta';
+  if(k === 'lr') return 'media';
+  if(k === 'lp') return 'media';
+  if(k === 'lvr') return 'baja';
+  return fallback || 'media';
+}
 function rankPriority(p){ return p==='critica'?0:p==='alta'?1:p==='media'?2:3; }
 function timeNum(t){ return Number(String(t||'15:00').replace(':','')) || 1500; }
-function compareRoute(a,b){ const la=parseUnit(a.unit), lb=parseUnit(b.unit); return (rankPriority(a.priority)-rankPriority(b.priority)) || (towerOrder(a.unit)-towerOrder(b.unit)) || (la.building-lb.building) || (la.level-lb.level) || (timeNum(a.limit)-timeNum(b.limit)); }
-function compareTime(a,b){ return timeNum(a.limit)-timeNum(b.limit); }
-function compareLocation(a,b){ const la=parseUnit(a.unit), lb=parseUnit(b.unit); return (towerOrder(a.unit)-towerOrder(b.unit)) || (la.building-lb.building) || (la.level-lb.level) || (rankPriority(a.priority)-rankPriority(b.priority)); }
+function compareRoute(a,b){ const la=parseUnit(a.unit), lb=parseUnit(b.unit); return (rankType(a)-rankType(b)) || (rankPriority(a.priority)-rankPriority(b.priority)) || (towerOrder(a.unit)-towerOrder(b.unit)) || (la.building-lb.building) || (la.level-lb.level) || (timeNum(a.limit)-timeNum(b.limit)); }
+function compareTime(a,b){ return (rankType(a)-rankType(b)) || (timeNum(a.limit)-timeNum(b.limit)); }
+function compareLocation(a,b){ const la=parseUnit(a.unit), lb=parseUnit(b.unit); return (towerOrder(a.unit)-towerOrder(b.unit)) || (la.building-lb.building) || (la.level-lb.level) || (rankType(a)-rankType(b)); }
 function sortRecommended(el){ setSortActive(el); cleanings.sort(compareRoute); render(); }
 function sortByTime(el){ setSortActive(el); cleanings.sort(compareTime); render(); }
 function sortByTower(el){ setSortActive(el); cleanings.sort(compareLocation); render(); }
@@ -454,7 +518,7 @@ function cardHTML(c, idx){
       <div class="unit-row">
         <div>
           <div class="unit">${escapeHTML(c.unit)}</div>
-          <div class="tag-row">${routeTag}<span class="badge ${c.priority}">${priorityLabel(c.priority)}</span></div>
+          <div class="tag-row">${routeTag}<span class="badge tipo">${typeLabel(c)}</span><span class="badge ${c.priority}">${priorityLabel(c.priority)}</span></div>
         </div>
       </div>
       <div class="status ${c.status}">${statusText}</div>
@@ -465,8 +529,8 @@ function cardHTML(c, idx){
   </article>`;
 }
 function actionButtons(c){
-  if(c.status==='terminada') return `<button class="ghost-btn" onclick="showToast('Evidencia: ${c.evidence ? 'ver links en Sheets/Drive' : 'sin evidencia registrada'}')">Ver evidencia</button><button class="action-btn gold" onclick="openCorrection('${escapeAttr(c.id)}')">Corregir</button>`;
-  if(c.status==='revision') return `<button class="action-btn blue" onclick="approveCleaning('${escapeAttr(c.id)}')">Aprobar</button><button class="action-btn gold" onclick="openCorrection('${escapeAttr(c.id)}')">Corregir</button><button class="ghost-btn full" onclick="openIssue('${escapeAttr(c.id)}')">Problema</button>`;
+  if(c.status==='terminada') return `<button class="action-btn gold" onclick="openCorrection('${escapeAttr(c.id)}')">Corregir</button>`;
+  if(c.status==='revision') return `<button class="action-btn blue" onclick="openApprove('${escapeAttr(c.id)}')">Aprobar</button><button class="action-btn gold" onclick="openCorrection('${escapeAttr(c.id)}')">Corregir</button><button class="ghost-btn full" onclick="openIssue('${escapeAttr(c.id)}')">Problema</button>`;
   if(c.status==='proceso' || c.status==='correccion') return `<button class="action-btn gold" onclick="openClose('${escapeAttr(c.id)}')">Terminar</button><button class="ghost-btn" onclick="openIssue('${escapeAttr(c.id)}')">Problema</button>`;
   if(c.status==='incidencia') return `<button class="action-btn" onclick="openIssue('${escapeAttr(c.id)}')">Actualizar</button><button class="ghost-btn" onclick="openClose('${escapeAttr(c.id)}')">Cerrar</button>`;
   return `<button class="action-btn" onclick="setStatus('${escapeAttr(c.id)}','proceso')">Iniciar</button><button class="ghost-btn" onclick="openIssue('${escapeAttr(c.id)}')">Problema</button><button class="action-btn gold full" onclick="openClose('${escapeAttr(c.id)}')">Terminar</button>`;
@@ -475,14 +539,60 @@ function priorityLabel(p){ return p==='critica'?'Crítica':p==='alta'?'Alta':p==
 function renderRoute(){
   const route=document.getElementById('routeList');
   const active=cleanings.filter(c=>!['terminada','cancelada'].includes(c.status)).slice().sort(compareRoute).slice(0,6);
-  route.innerHTML = `<h2 class="section-title" style="font-size:22px;margin-top:8px">Ruta sugerida</h2><p class="section-note" style="margin-bottom:4px">Prioridad antes que ubicación. Dentro de cada prioridad: ${START_POINT} → ${TOWER_ROUTE.join(' → ')}.</p>` + active.map((c,i)=>`<div class="route-item"><div class="route-no">${i+1}</div><div><strong>${escapeHTML(c.unit)}</strong><span>${escapeHTML(c.limit)} · ${escapeHTML(c.cleaner)} · ${amenityText(c.unit)}</span></div><div class="route-tag">${priorityLabel(c.priority)}</div></div>`).join('');
+  route.innerHTML = `<h2 class="section-title" style="font-size:22px;margin-top:8px">Ruta sugerida</h2><p class="section-note" style="margin-bottom:4px">Orden: Refresh → LR → LP → LVR. Después: ${START_POINT} → ${TOWER_ROUTE.join(' → ')}.</p>` + active.map((c,i)=>`<div class="route-item"><div class="route-no">${i+1}</div><div><strong>${escapeHTML(c.unit)}</strong><span>${escapeHTML(c.limit)} · ${escapeHTML(c.cleaner)} · ${amenityText(c.unit)}</span></div><div class="route-tag">${typeLabel(c)}</div></div>`).join('');
 }
 function filterCards(status, el){ currentFilter=status; document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); el.classList.add('active'); render(); }
 function findById(id){ return cleanings.find(x=>x.id===id); }
 function assignCleaner(id, value){ const c=findById(id); if(!c) return; c.cleaner=value; postAction({action:'assignCleaner', id:c.id, cleaner:value}); renderRoute(); showToast(`Camarista asignada: ${c.unit} · ${value}`); }
 function setStatus(id,status, comment=''){ const c=findById(id); if(!c)return; const old=c.status; c.status=status; postAction({action:'updateStatus', id:c.id, status, oldStatus:old, comment}); render(); showToast(`Estatus actualizado: ${c.unit}`); }
-function approveCleaning(id){ setStatus(id, 'terminada', 'Aprobado por supervisión'); }
-function openClose(id){ currentId=id; const c=findById(id); if(!c)return; currentUnit=c.unit; document.getElementById('closeUnit').textContent=c.unit; document.getElementById('closeModal').style.display='flex'; }
+function approveCleaning(id){ openApprove(id); }
+function openApprove(id){ openClose(id, 'approve'); }
+function openClose(id, mode='close'){
+  currentId=id; currentCloseMode=mode;
+  const c=findById(id); if(!c)return;
+  currentUnit=c.unit;
+  document.getElementById('closeUnit').textContent=c.unit;
+  document.getElementById('closeComment').value='';
+  renderSupervisionChecklist(c);
+  const title=document.getElementById('closeModalTitle');
+  const result=document.getElementById('closeResult');
+  const saveBtn=document.getElementById('closeSaveBtn');
+  if(mode==='approve'){
+    title.textContent='Checklist de aprobación';
+    document.getElementById('reviewIntro').textContent='Revisa cada área. Marca la palomita cuando esté correcta. Las fotos y evidencias se manejan por WhatsApp.';
+    result.innerHTML='<option value="terminada">Aprobada / terminada</option><option value="correccion">No aprobar, mandar a corrección</option><option value="incidencia">No aprobar, hay incidencia</option>';
+    saveBtn.textContent='Guardar aprobación';
+  } else {
+    title.textContent='Cierre de limpieza';
+    document.getElementById('reviewIntro').textContent='Checklist rápido antes de mandar a revisión. Las fotos y evidencias se manejan por WhatsApp.';
+    result.innerHTML='<option value="revision">Lista para revisión</option><option value="incidencia">No, hay incidencia</option>';
+    saveBtn.textContent='Guardar cierre';
+  }
+  document.getElementById('closeModal').style.display='flex';
+}
+function checklistSectionsForUnit(unit){
+  const features = unitFeatures(unit);
+  const sections = [
+    {id:'recamaras', title:'Recámaras', items:['Ropa de cama limpia y bien tensada','Almohadas y cojines acomodados','Burós y lámparas sin polvo','Clóset / cajones revisados','Basura retirada']},
+    {id:'banos', title:'Baños', items:['Toalla de manos','Toalla facial','Papel de baño','Bolsa en el bote','Jabones completos','WC, lavabo, regadera y espejo limpios','Piso seco y sin cabello']},
+    {id:'cocina', title:'Cocina', items:['Tarja y parrilla limpias','Vajilla y vasos completos','Refrigerador revisado','Café / amenidades revisadas','Bolsa en el bote','Piso limpio']},
+    {id:'sala', title:'Sala / comedor', items:['Mesa y superficies limpias','Sofá y cojines acomodados','Control remoto visible','Ventanas / cristales revisados','Decoración en orden']},
+    {id:'amenidades', title:'Amenidades', items:['Toallas completas','Papel y jabones completos','Bolsas de basura colocadas','Sin objetos olvidados visibles']}
+  ];
+  const exteriorItems = [];
+  if(features.includes('Alberca')) exteriorItems.push('Alberca limpia');
+  if(features.includes('Terraza')) exteriorItems.push('Terraza limpia','Muebles exteriores acomodados');
+  if(features.includes('Rooftop')) exteriorItems.push('Rooftop limpio','Parrilla / área BBQ revisada','Muebles exteriores acomodados');
+  if(exteriorItems.length) sections.push({id:'exterior', title:'Exterior', items:exteriorItems});
+  sections.push({id:'basura', title:'Cierre general', items:['Basura retirada','Puertas y ventanas cerradas','A/C y luces revisadas','Departamento listo para huésped']});
+  return sections;
+}
+function renderSupervisionChecklist(c){
+  const features = unitFeatures(c.unit);
+  document.getElementById('unitFeatures').innerHTML = features.length ? features.map(f=>`<span class="feature-pill">${escapeHTML(f)}</span>`).join('') : '<span class="feature-pill">Interior</span>';
+  const sections = checklistSectionsForUnit(c.unit);
+  document.getElementById('supervisionChecklist').innerHTML = sections.map(sec=>`<div class="review-area"><label class="review-area-head"><span>${escapeHTML(sec.title)}</span><input type="checkbox" data-check-id="${escapeAttr(sec.id)}"></label><ul class="review-list">${sec.items.map(item=>`<li>${escapeHTML(item)}</li>`).join('')}</ul></div>`).join('');
+}
 function openIssue(id){ currentId=id; const c=findById(id); if(!c)return; currentUnit=c.unit; document.getElementById('issueUnit').textContent=c.unit; document.getElementById('issueModal').style.display='flex'; }
 function openCorrection(id){ currentId=id; const c=findById(id); if(!c)return; currentUnit=c.unit; document.getElementById('correctionUnit').textContent=c.unit; document.getElementById('correctionCleaner').value=c.cleaner || 'Sin asignar'; document.getElementById('correctionPriority').value=priorityLabel(c.priority); document.getElementById('correctionComment').value=''; document.getElementById('correctionModal').style.display='flex'; }
 function openAdd(){ document.getElementById('addUnit').value=''; document.getElementById('addNotes').value=''; document.getElementById('addModal').style.display='flex'; }
@@ -491,11 +601,14 @@ async function finishCleaning(){
   const c=findById(currentId); if(!c)return;
   const status = document.getElementById('closeResult').value;
   const comment = document.getElementById('closeComment').value.trim();
-  const files = await filesToBase64(document.getElementById('closeFiles').files);
-  c.status=status; c.evidence = files.length ? 'Subido a Drive' : c.evidence;
-  postAction({action:'closeCleaning', id:c.id, status, comment, checklist:getChecklist(), files});
-  closeModal('closeModal'); render(); showToast(status==='revision'?'Lista para revisión.':'Se registró incidencia.');
-  document.getElementById('closeFiles').value=''; document.getElementById('closeComment').value='';
+  c.status=normalizeStatus(status);
+  postAction({action:'closeCleaning', id:c.id, status, comment, checklist:getChecklist(), files:[]});
+  closeModal('closeModal'); render();
+  if(status==='terminada') showToast('Limpieza aprobada y marcada como terminada.');
+  else if(status==='revision') showToast('Lista para revisión.');
+  else if(status==='correccion') showToast('Se mandó a corrección.');
+  else showToast('Se registró incidencia.');
+  document.getElementById('closeComment').value='';
 }
 async function saveIssue(){
   const c=findById(currentId); if(!c)return;
@@ -520,7 +633,14 @@ function saveManualCleaning(){
   postAction({action:'addCleaning', cleaning:c});
   closeModal('addModal'); sortRecommended(); showToast('Limpieza agregada.');
 }
-function getChecklist(){ return {recamaras:chkRecamaras.checked, banos:chkBanos.checked, cocina:chkCocina.checked, sala:chkSala.checked, terraza:chkTerraza.checked, alberca:chkAlberca.checked, amenidades:chkAmenidades.checked, basura:chkBasura.checked}; }
+function getChecklist(){
+  const result = {mode:currentCloseMode, unit:currentUnit, checked:{}, unchecked:[]};
+  document.querySelectorAll('#supervisionChecklist [data-check-id]').forEach(input=>{
+    result.checked[input.dataset.checkId] = input.checked;
+    if(!input.checked) result.unchecked.push(input.dataset.checkId);
+  });
+  return result;
+}
 function filesToBase64(fileList){
   const files = Array.from(fileList||[]);
   return Promise.all(files.map(file=>new Promise(resolve=>{ const reader=new FileReader(); reader.onload=()=>resolve({name:file.name, mimeType:file.type||'application/octet-stream', data:reader.result}); reader.onerror=()=>resolve(null); reader.readAsDataURL(file); }))).then(arr=>arr.filter(Boolean));
@@ -534,6 +654,13 @@ function refreshStats(){
 function populateStaffSelects(){
   ['correctionCleaner','addCleaner'].forEach(id=>{ const s=document.getElementById(id); if(s) s.innerHTML=STAFF.map(n=>`<option>${n}</option>`).join(''); });
 }
+function showLoading(msg){
+  const overlay=document.getElementById('loadingOverlay');
+  const text=document.getElementById('loadingText');
+  if(text && msg) text.textContent=msg;
+  if(overlay) overlay.style.display='flex';
+}
+function hideLoading(){ const overlay=document.getElementById('loadingOverlay'); if(overlay) overlay.style.display='none'; }
 function setSync(msg){ document.getElementById('syncStatus').textContent=msg; }
 function escapeHTML(str){ return String(str||'').replace(/[&<>"]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
 function escapeAttr(str){ return escapeHTML(str).replace(/'/g,'&#39;'); }
